@@ -1,37 +1,246 @@
-## Welcome to GitHub Pages
+## Data Preprocessing of IMDB Data
 
-You can use the [editor on GitHub](https://github.com/DanielCEvans/Data-Preprocessing-of-IMDB-Data/edit/gh-pages/README.md) to maintain and preview the content for your website in Markdown files.
+## Executive Summary
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+The ‘Tab Separated Values (tsv)’ files and were imported into R. The “\N” were converted to NA’s and most of the variables were imported into their correct data types.
 
-### Markdown
+The two datasets were then joined together by the common variable type ‘tconst’. Unnecessary variables were then removed and the number of observations filtered out to make the size of the dataset more manageable. The ‘titleType’ variable was then converted to a factor and labelled. The ‘startYear’ variable was converted from a character to an integer data type. All the variables in the data were then deemed to be in the correct type.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+The dataset was not in a tidy format as the ‘genre’ variable contained multiple values in each cell. The ‘genre’ and ‘tconst’ variables were then selected and a new dataset created which holds the genre types for each title in separate cells. Both datasets were now in a tidy format. A new variable was made called ‘rank’ to determine the top 10 movies in the dataset. The rank variable ranked each title by the number of votes it received multiplied by its average rating.
 
-```markdown
-Syntax highlighted code block
+The data was then scanned for missing values, errors, and inconsistencies. Missing values in the ‘titleType’ variable were deleted as there was a very small percentage while the mean was imputed for the ‘runtimeMinutes’ variable by ‘titleType’. No missing values remained in the dataset. There were no special values or errors found.
 
-# Header 1
-## Header 2
-### Header 3
+The dataset was then scanned for outliers. Outliers were found in ‘numVotes’ and ‘runtimeMinutes’ by titleType however after research these entries were deemed to be valid.
 
-- Bulleted
-- List
+A histogram of ‘averageRating’ showed the data to be left skewed. A square transformation was done which significantly reduced the skewedness and transformed the data into a normal distribution making statistical analysis much simpler.
 
-1. Numbered
-2. List
+## Table of Contents
+1. Executive Summary
+2. Data
 
-**Bold** and _Italic_ and `Code` text
+## Data
 
-[Link](url) and ![Image](src)
+The datasets were downloaded as ‘Tab Separated Values(tsv)’ files from the International Movie Database (IMDB) website
+
+[https://datasets.imdbws.com/](https://datasets.imdbws.com/)
+
+The IMDB website is a popular website to find out any relevant information regarding thousands of movies, tv shows, documentaries etc. Users can leave reviews of titles, determine the cast, writers, directors of specific titles and much more. It is a very useful site for determining your next movie to watch. The datasets are accessible to customers for personal and non-commercial use and are refreshed daily. The two datasets we chose to join together are ‘basics’ and ‘ratings’.
+
+Basics contains the following information for titles:
+
+- tconst (string): alphanumeric unique identifier of the title
+- titleType (string): the type/format of the title (e.g. movie, short, tvseries, tvepisode, video, etc)
+- primaryTitle (string): the more popular title / the title used by the filmmakers on promotional materials at the point of release
+- originalTitle (string): original title, in the original language
+- isAdult (boolean): 0 non-adult title; 1 adult title
+- startYear (YYYY): represents the release year of a title. In the case of TV Series, it is the series start year
+- endYear (YYYY): TV Series end year. ‘’ for all other title types
+- runtimeMinutes: primary runtime of the title, in minutes
+- genres (string array): includes up to three genres associated with the title
+
+Ratings contains the IMDb rating and votes information for titles
+
+- tconst (string): alphanumeric unique identifier of the title
+- averageRating: weighted average of all the individual user ratings
+- numVotes: number of votes the title has received
+
+```
+## Import data
+titles <- read_delim("title.basics.tsv", "\t", escape_double = FALSE, na = "\\N", trim_ws = TRUE, quote='',
+                     col_types = cols(
+                       tconst = col_character(), 
+                       titleType = col_character(),
+                       primaryTitle = col_character(),
+                       originalTitle = col_character(),
+                       isAdult = col_logical(),
+                       startYear = col_character(),
+                       endYear = col_integer(),                 
+                       runtimeMinutes = col_integer(), 
+                       genres = col_character()))
+                       
+ratings <- read_delim("title.ratings.tsv", "\t", escape_double = FALSE, na = "\\N", trim_ws = TRUE, quote='')
+head(titles)
+head(ratings)
+
+## Join datasets
+data <- titles %>% left_join(ratings, by = "tconst")
+head(data)
 ```
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+IMAGE1
 
-### Jekyll Themes
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/DanielCEvans/Data-Preprocessing-of-IMDB-Data/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+- The datasets were imported into R using the ‘read_delim’ function.
+- the “\N” were converted to NA’s and most of the variables were converted to their correct data types upon importing the data into R using the col_types argument.
+- The Ratings dataset was joined to Basics by the ‘tconst’ variable using a left_join.
 
-### Support or Contact
+## Understanding the Data
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+```
+# drop unneeded columns
+data <- data %>% select(-originalTitle, -endYear)
+# filtered observations
+data <- data %>% filter(averageRating >= 2 & numVotes >= 50)
+str(data)
+# convert titlesType to factor
+data$titleType <- factor(data$titleType, 
+                         levels = c("short", "movie", "tvSeries", "tvShort",                                      "tvMovie", "tvEpisode", "tvMiniSeries",                                       "tvSpecial", "video", "videoGame"), 
+                         labels = c("Short", "Movie", "TV_Series", "TV_Short",                                     "TV_Movie", "TV_Episode", "TV_MiniSeries",                                     "TV_Special", "Video", "Video_Game"))
+# show all the titleTypes with counts descending
+data %>% group_by(titleType) %>% summarise(count = n()) %>% arrange(desc(count))
+# converts startYear to an integer data type
+data$startYear <- as.integer(data$startYear)
+head(data)
+```
+
+IMAGE2
+IMAGE3
+
+-	Due to the sheer size of the dataset, we decided to remove what we thought we unnecessary variables and to filter out certain observations to make the dataset more manageable. 
+-	We removed the variables ‘originalTitle’, ‘endYear’.
+      - The original title variable repeated the same information as the ‘primary title’ variable for a lot of cases.  
+      - A large amount of data was missing for the ‘endYear’ variable. 
+- We filtered out all observations where the average movie rating was less than 2, and the number of votes cast for the movie was less than 50. This significantly reduced the size of the dataset which made it much easier to work with. 
+- The structure of the dataset was then examined. Most of the variable datatypes were imported correctly, with the exception of ‘titleType’ which should be a factor, and ‘startYear’ which should be an integer. 
+- The required data conversions were then carried out. 
+- The final dataset consists of character, logical, numeric, factor, and integer variables. 
+
+## Tidy & Manipulate Data I 
+
+```
+# split genres column (which is a comma seperated list) into a seperate table
+data_genres <- data %>% select(tconst, genres) %>% separate_rows(genres, sep=",")
+# convert the genres column to a factor
+data_genres$genres <- factor(data_genres$genres)
+# show all the genres with counts descending
+data_genres %>% group_by(genres) %>% summarise(count = n()) %>% arrange(desc(count))
+# drop genres from data table
+data <- data %>% select(-genres)
+head(data_genres)
+head(data)
+```
+
+IMAGE4
+IMAGE5
+
+- In order for the dataset to conform to tidy principles;
+    - Each variable must have its own column.
+    -	Each observation must have its own row.
+    - Each value must have its own cell.
+- At the moment the titles table does not conform to tidy principles since the genre column contains multiple values that are comma seperated.
+- To correct this, we split out the ‘genre’ and ‘tconst’ variables into a seperate data table. Separating each comma seperated value into its own row.
+- Both the data and data_genres tables are now in tidy format and have correct datatypes for all columns. 
+
+## Tidy & Manipulate Data II
+
+```
+#6 create/mutate a variable
+ranks = ratings %>% mutate(rank = dense_rank(desc(averageRating * numVotes))) %>% filter(rank <= 10)
+
+titles %>% inner_join(ranks, by="tconst") %>% arrange(rank) %>% select(primaryTitle, startYear, rank, averageRating, numVotes)
+
+data <- data %>% mutate(rank = dense_rank(desc(averageRating * numVotes))) 
+head(data)
+```
+
+IMAGE6
+IMAGE7
+
+To answer the Question: **What are the top 10 movies in the database by popular vote?**
+
+- We are trying to find the top 10 movies with the highest value for averageRating * numVotes.
+- Use dense_rank function to assign order the calculation averageRating * numVotes from highest to lowest, then assign a rank.
+- Use inner_join to join the titles table to the ranks table.
+    - inner_join is used because we only want those titles that exist in ranks to be returned.
+- The tibble prints out the top 10 movies in the dataset with "The Shawshank Redemption" being the number one movie. 
+- The rank varaible was then added to the entire dataset. 
+
+## Scan I 
+
+```
+colSums(is.na(data))
+## removed all rows where startYear contained NA's as the amount of missing data was less than 5% (15/295822 < 0.05)
+data <- data[!is.na(data$startYear),]
+
+## as the amount of missing values is greater than 5% for runtimeMinutes. We imputed the mean by movie category
+data$runtimeMinutes <-  with(data, ave(runtimeMinutes, titleType, FUN = function(x) replace(x, is.na(x), mean(x, na.rm = TRUE))))
+sapply(data, function(x) sum(is.na(x)))
+
+## checking for special values.
+is.special <- function(x){
+   if (is.numeric(x))(is.infinite(x) | is.nan(x))
+}
+sapply(data, function(x) sum(is.special(x)))
+
+## checking for inconsistencies or errors
+(Rule1 <- editset(c("runtimeMinutes >= 0",
+                    "averageRating >= 0", "averageRating <= 10",
+                    "numVotes >= 0", 
+                    "startYear > 0", "startYear < 2020")))
+v <- violatedEdits(Rule1, data)
+sum(v)
+```
+
+IMAGE8
+IMAGE9
+IMAGE10
+IMAGE11
+
+- The sum of missing values per column was calculated. 
+- Due to there being such a small percentage of missing values in the startYear column, it was deemed appropritate to simply remove these observations from the data
+- As the amount of missing values is greater than 5% for ‘runtimeMinutes’, we imputed the mean value by ‘titleType’ 
+- We then checked to make sure that there were no further missing values in the dataset
+- We then checked for the presence of any infinite or nan values in the dataset of which there were none. 
+- We then checked for any inconsistencies in the dataset. Such as negative values in time varaibles, movie rating being between 0 and 10, and startYear being less than 2020.  
+
+## Scan II
+```
+datas <- data %>% group_by(titleType) %>% summarise(
+  N   = n(),
+  MEAN = mean(runtimeMinutes, na.rm = T), 
+  SD  = sd(runtimeMinutes, na.rm = T),
+  MIN = min(runtimeMinutes, na.rm = T), 
+  Q1  = quantile(runtimeMinutes, .25, na.rm = T), 
+  MEDIAN = quantile(runtimeMinutes, .5, na.rm = T), 
+  Q3   = quantile(runtimeMinutes, .75, na.rm = T), 
+  MAX  = max(runtimeMinutes, na.rm = T), 
+  IQR  = Q3-Q1, 
+  LF = Q1 - 1.5*IQR,
+  UF = Q3 + 1.5*IQR,
+  LOUT = sum(runtimeMinutes < LF, na.rm = T),
+  UOUT = sum(runtimeMinutes > UF, na.rm = T),
+  PERC_OUT = round(100*(LOUT+UOUT)/N,2))
+datas %>% select(titleType, N, LOUT, UOUT, PERC_OUT) %>% arrange(desc(N))
+
+boxplot(data$runtimeMinutes ~ data$titleType, 
+        main = "Runtime Minutes by Title Type",
+        xlab = "Title Type",
+        ylab = "Runtime Minutes")
+```
+
+IMAGE12
+IMAGE13
+
+- According to the Tukey’s method of outlier detection, outliers are defined as the values in the data set that fall beyond the range of −1.5×IQR to 1.5×IQR. 
+- We determined the number of outliers in the ‘averageRating’ variable to be 5215 from the above table.
+- As the percentage of outliers is 1.7%, we deemed it appropriate to simply remove these observations from the dataset. 
+
+- A Multivariate boxplot was plotted to determine possible outliers in runtimeMinutes by titleType. 
+- Although the plot does show outliers in the variable, after conducting research the data was deemed to be valid. 
+- There is a movie which goes for 10 days (14400 hours!)
+
+- The same can be said for the number of votes and average rating numeric variables. Conducting a boxplot shows the presence of many outliers however these are not in fact outliers as the most popular movies receive a huge number of votes in relation to other not so successful movies, and all ratings fell within 0 to 10 as checked above making them valid data.   
+
+
+## Transform 
+
+```
+hist(data$averageRating  , main = "Fig1 Histogram of Average Rating", xlab = "Average Rating")
+hist(data$averageRating^2, main = "Fig2 Histogram of Average Rating Squared", xlab = "Average Rating Squared")
+```
+
+IMAGE14
+IMAGE15
+
+- In Fig1 we show a histogram of average ratings from the dataset. The data is left skewed.
+- Fig2 shows when a squaring transformation is applied, the histogram looks more like a normal distribution 
