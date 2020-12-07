@@ -17,6 +17,12 @@ A histogram of ‘averageRating’ showed the data to be left skewed. A square t
 ## Table of Contents
 1. Executive Summary
 2. Data
+3. Understanding the Data
+4. Tidy & Manipulate Data I 
+5. Tidy & Manipulate Data II
+6. Scan I
+7. Scan II
+8. Transform
 
 ## Data
 
@@ -67,7 +73,7 @@ data <- titles %>% left_join(ratings, by = "tconst")
 head(data)
 ```
 
-IMAGE1
+<img width="910" alt="1" src="https://user-images.githubusercontent.com/65587875/101319342-ea88c500-38b5-11eb-8ab9-30a3889da7fc.png">
 
 
 - The datasets were imported into R using the ‘read_delim’ function.
@@ -93,8 +99,9 @@ data$startYear <- as.integer(data$startYear)
 head(data)
 ```
 
-IMAGE2
-IMAGE3
+<img width="909" alt="2" src="https://user-images.githubusercontent.com/65587875/101319341-e9f02e80-38b5-11eb-950e-f58900fc2b64.png">
+<img width="910" alt="3" src="https://user-images.githubusercontent.com/65587875/101319337-e8bf0180-38b5-11eb-8b8a-b6586f305b02.png">
+
 
 -	Due to the sheer size of the dataset, we decided to remove what we thought we unnecessary variables and to filter out certain observations to make the dataset more manageable. 
 -	We removed the variables ‘originalTitle’, ‘endYear’.
@@ -120,8 +127,9 @@ head(data_genres)
 head(data)
 ```
 
-IMAGE4
-IMAGE5
+<img width="908" alt="4" src="https://user-images.githubusercontent.com/65587875/101319336-e8266b00-38b5-11eb-8696-15dd1d114584.png">
+<img width="909" alt="5" src="https://user-images.githubusercontent.com/65587875/101319333-e78dd480-38b5-11eb-8581-10c51d01d456.png">
+
 
 - In order for the dataset to conform to tidy principles;
     - Each variable must have its own column.
@@ -143,8 +151,9 @@ data <- data %>% mutate(rank = dense_rank(desc(averageRating * numVotes)))
 head(data)
 ```
 
-IMAGE6
-IMAGE7
+<img width="914" alt="6" src="https://user-images.githubusercontent.com/65587875/101319327-e52b7a80-38b5-11eb-8733-fe88be077472.png">
+<img width="911" alt="7" src="https://user-images.githubusercontent.com/65587875/101319317-e2308a00-38b5-11eb-96f3-9dec66b93078.png">
+
 
 To answer the Question: **What are the top 10 movies in the database by popular vote?**
 
@@ -181,10 +190,11 @@ v <- violatedEdits(Rule1, data)
 sum(v)
 ```
 
-IMAGE8
-IMAGE9
-IMAGE10
-IMAGE11
+<img width="472" alt="8" src="https://user-images.githubusercontent.com/65587875/101319314-e197f380-38b5-11eb-84a4-3aee6f813098.png">
+<img width="499" alt="9" src="https://user-images.githubusercontent.com/65587875/101319312-e197f380-38b5-11eb-930f-66e30e68de4d.png">
+<img width="480" alt="10" src="https://user-images.githubusercontent.com/65587875/101319311-e0ff5d00-38b5-11eb-810e-1d307215e3f1.png">
+<img width="214" alt="11" src="https://user-images.githubusercontent.com/65587875/101319309-e066c680-38b5-11eb-8790-ae1e3bb5416e.png">
+
 
 - The sum of missing values per column was calculated. 
 - Due to there being such a small percentage of missing values in the startYear column, it was deemed appropritate to simply remove these observations from the data
@@ -218,8 +228,9 @@ boxplot(data$runtimeMinutes ~ data$titleType,
         ylab = "Runtime Minutes")
 ```
 
-IMAGE12
-IMAGE13
+<img width="911" alt="12" src="https://user-images.githubusercontent.com/65587875/101319307-e066c680-38b5-11eb-8686-dea6e0e5bdc3.png">
+<img width="861" alt="13" src="https://user-images.githubusercontent.com/65587875/101319302-df359980-38b5-11eb-85db-772fa1491b4a.png">
+
 
 - According to the Tukey’s method of outlier detection, outliers are defined as the values in the data set that fall beyond the range of −1.5×IQR to 1.5×IQR. 
 - We determined the number of outliers in the ‘averageRating’ variable to be 5215 from the above table.
@@ -239,8 +250,9 @@ hist(data$averageRating  , main = "Fig1 Histogram of Average Rating", xlab = "Av
 hist(data$averageRating^2, main = "Fig2 Histogram of Average Rating Squared", xlab = "Average Rating Squared")
 ```
 
-IMAGE14
-IMAGE15
+<img width="842" alt="14" src="https://user-images.githubusercontent.com/65587875/101319295-de046c80-38b5-11eb-961e-94b07f8c9f76.png">
+<img width="863" alt="15" src="https://user-images.githubusercontent.com/65587875/101319279-d8a72200-38b5-11eb-94e5-9f614d9a2051.png">
+
 
 - In Fig1 we show a histogram of average ratings from the dataset. The data is left skewed.
 - Fig2 shows when a squaring transformation is applied, the histogram looks more like a normal distribution 
