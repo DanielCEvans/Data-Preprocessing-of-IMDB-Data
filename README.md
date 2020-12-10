@@ -23,6 +23,7 @@ A histogram of ‘averageRating’ showed the data to be left skewed. A square t
 6. Scan I
 7. Scan II
 8. Transform
+{:toc}
 
 ## Data
 
@@ -103,11 +104,11 @@ head(data)
 <img width="910" alt="3" src="https://user-images.githubusercontent.com/65587875/101319337-e8bf0180-38b5-11eb-8b8a-b6586f305b02.png">
 
 
--	Due to the sheer size of the dataset, we decided to remove what we thought we unnecessary variables and to filter out certain observations to make the dataset more manageable. 
--	We removed the variables ‘originalTitle’, ‘endYear’.
+-	Due to the sheer size of the dataset, I decided to remove what I thought were unnecessary variables and to filter out certain observations to make the dataset more manageable. 
+-	I removed the variables ‘originalTitle’, ‘endYear’.
       - The original title variable repeated the same information as the ‘primary title’ variable for a lot of cases.  
       - A large amount of data was missing for the ‘endYear’ variable. 
-- We filtered out all observations where the average movie rating was less than 2, and the number of votes cast for the movie was less than 50. This significantly reduced the size of the dataset which made it much easier to work with. 
+- I filtered out all observations where the average movie rating was less than 2, and the number of votes cast for the movie was less than 50. This significantly reduced the size of the dataset which made it much easier to work with. 
 - The structure of the dataset was then examined. Most of the variable datatypes were imported correctly, with the exception of ‘titleType’ which should be a factor, and ‘startYear’ which should be an integer. 
 - The required data conversions were then carried out. 
 - The final dataset consists of character, logical, numeric, factor, and integer variables. 
@@ -136,7 +137,7 @@ head(data)
     -	Each observation must have its own row.
     - Each value must have its own cell.
 - At the moment the titles table does not conform to tidy principles since the genre column contains multiple values that are comma seperated.
-- To correct this, we split out the ‘genre’ and ‘tconst’ variables into a seperate data table. Separating each comma seperated value into its own row.
+- To correct this, I split out the ‘genre’ and ‘tconst’ variables into a seperate data table. Separating each comma seperated value into its own row.
 - Both the data and data_genres tables are now in tidy format and have correct datatypes for all columns. 
 
 ## Tidy & Manipulate Data II
@@ -157,7 +158,7 @@ head(data)
 
 To answer the Question: **What are the top 10 movies in the database by popular vote?**
 
-- We are trying to find the top 10 movies with the highest value for averageRating * numVotes.
+- I was interested in finding the top 10 movies with the highest value for averageRating * numVotes.
 - Use dense_rank function to assign order the calculation averageRating * numVotes from highest to lowest, then assign a rank.
 - Use inner_join to join the titles table to the ranks table.
     - inner_join is used because we only want those titles that exist in ranks to be returned.
@@ -198,10 +199,10 @@ sum(v)
 
 - The sum of missing values per column was calculated. 
 - Due to there being such a small percentage of missing values in the startYear column, it was deemed appropritate to simply remove these observations from the data
-- As the amount of missing values is greater than 5% for ‘runtimeMinutes’, we imputed the mean value by ‘titleType’ 
-- We then checked to make sure that there were no further missing values in the dataset
-- We then checked for the presence of any infinite or nan values in the dataset of which there were none. 
-- We then checked for any inconsistencies in the dataset. Such as negative values in time varaibles, movie rating being between 0 and 10, and startYear being less than 2020.  
+- As the amount of missing values is greater than 5% for ‘runtimeMinutes’, I imputed the mean value by ‘titleType’ 
+- I then checked to make sure that there were no further missing values in the dataset
+- I then checked for the presence of any infinite or nan values in the dataset of which there were none. 
+- I then checked for any inconsistencies in the dataset. Such as negative values in time varaibles, movie rating being between 0 and 10, and startYear being less than 2020.  
 
 ## Scan II
 ```
@@ -233,8 +234,8 @@ boxplot(data$runtimeMinutes ~ data$titleType,
 
 
 - According to the Tukey’s method of outlier detection, outliers are defined as the values in the data set that fall beyond the range of −1.5×IQR to 1.5×IQR. 
-- We determined the number of outliers in the ‘averageRating’ variable to be 5215 from the above table.
-- As the percentage of outliers is 1.7%, we deemed it appropriate to simply remove these observations from the dataset. 
+- I determined the number of outliers in the ‘averageRating’ variable to be 5215 from the above table.
+- As the percentage of outliers is 1.7%, I deemed it appropriate to simply remove these observations from the dataset. 
 
 - A Multivariate boxplot was plotted to determine possible outliers in runtimeMinutes by titleType. 
 - Although the plot does show outliers in the variable, after conducting research the data was deemed to be valid. 
@@ -254,5 +255,5 @@ hist(data$averageRating^2, main = "Fig2 Histogram of Average Rating Squared", xl
 <img width="863" alt="15" src="https://user-images.githubusercontent.com/65587875/101319279-d8a72200-38b5-11eb-94e5-9f614d9a2051.png">
 
 
-- In Fig1 we show a histogram of average ratings from the dataset. The data is left skewed.
+- In Fig1 I show a histogram of average ratings from the dataset. The data is left skewed.
 - Fig2 shows when a squaring transformation is applied, the histogram looks more like a normal distribution 
